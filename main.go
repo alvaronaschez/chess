@@ -33,6 +33,7 @@ func ping(w http.ResponseWriter, r *http.Request) {
 		game.AddWebsocket(ws)
 		ch = game.BlackChannel
 		game.Start()
+		game = nil
 	}
 
 	for {
