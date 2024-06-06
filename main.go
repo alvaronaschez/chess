@@ -39,7 +39,7 @@ func ping(w http.ResponseWriter, r *http.Request) {
 	for {
 		message := Message{}
 		err = ws.ReadJSON(&message)
-		// messageType, message, err := ws.ReadMessage()
+
 		if err != nil {
 			log.Println(err)
 			return

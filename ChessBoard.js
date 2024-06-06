@@ -46,34 +46,8 @@ class ChessBoard extends HTMLElement {
       boardHtml = shadow.getElementById("board");
     }
 
-    // this.b = new Chessboard(board, {
-    //   position: FEN.start,
-    //   assetsUrl: "./cm-chessboard/assets/",
-    // });
-
     const chess = new Chess();
     let color;
-
-    // let seed = 71;
-    // function random() {
-    //   const x = Math.sin(seed++) * 10000;
-    //   return x - Math.floor(x);
-    // }
-    // function makeEngineMove(chessboard) {
-    //   const possibleMoves = chess.moves({ verbose: true });
-    //   if (possibleMoves.length > 0) {
-    //     const randomIndex = Math.floor(random() * possibleMoves.length);
-    //     const randomMove = possibleMoves[randomIndex];
-    //     setTimeout(() => {
-    //       // smoother with 500ms delay
-    //       const move = { from: randomMove.from, to: randomMove.to };
-    //       chess.move(move);
-    //       chessboard.setPosition(chess.fen(), true);
-    //       chessboard.enableMoveInput(inputHandler, COLOR.white);
-    //       socket.send(JSON.stringify({ ...move, color: "black" }));
-    //     }, 500);
-    //   }
-    // }
 
     function inputHandler(event) {
       console.log("inputHandler", event);
@@ -103,10 +77,6 @@ class ChessBoard extends HTMLElement {
           event.chessboard.state.moveInputProcess.then(() => {
             // wait for the move input process has finished
             event.chessboard.setPosition(chess.fen(), true);
-            // .then(() => {
-            //   // update position, maybe castled and wait for animation has finished
-            //   makeEngineMove(event.chessboard);
-            // });
           });
         } else {
           // promotion?
@@ -134,7 +104,6 @@ class ChessBoard extends HTMLElement {
                       JSON.stringify({ ...move, color: color, type: "move" })
                     );
                     event.chessboard.setPosition(chess.fen(), true);
-                    // makeEngineMove(event.chessboard);
                   } else {
                     // promotion canceled
                     event.chessboard.enableMoveInput(inputHandler, COLOR.white);
@@ -169,12 +138,8 @@ class ChessBoard extends HTMLElement {
         { class: Accessibility, props: { visuallyHidden: true } },
       ],
     });
-    // board.enableMoveInput(inputHandler, COLOR.white);
 
     const socket = new WebSocket("ws://localhost:5555/ping");
-    //   socket.addEventListener("open", (event) => {
-    //     socket.send("Hello Server!");
-    //   });
     socket.addEventListener("message", (event) => {
       console.log("Message from server ", event.data);
       let message = JSON.parse(event.data);
@@ -201,9 +166,6 @@ class ChessBoard extends HTMLElement {
       }
     });
   }
-  // connectedCallback() {
-  //   this.b.setPosition(FEN.start);
-  // }
 }
 
 customElements.define("chess-board", ChessBoard);
