@@ -8,11 +8,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type Something struct {
-	Thing      string `json:"thing"`
-	OtherThing int64  `json:"other_thing"`
-}
-
 var upgrader = websocket.Upgrader{}
 
 var game *ChessGame
