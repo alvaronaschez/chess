@@ -1,10 +1,10 @@
 fe: fe-vue
 
 be:
-	(cd api && go run .)
+	(cd backend && go run .)
 
 fe-vue:
-	(cd fe-chess && npm run dev)
+	(cd frontend && npm run dev)
 
 fe-web-components:
-	(cd fe-web-components && npx live-server)
+	(cd frontend-web-components && npx live-server)
