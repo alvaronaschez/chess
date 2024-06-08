@@ -1,21 +1,47 @@
 <script setup lang="ts">
-import { BoardApi, TheChessboard, type MoveEvent, type MoveableColor } from 'vue3-chessboard'
+import { ref } from 'vue'
+import { BoardApi, TheChessboard, type MoveEvent } from 'vue3-chessboard'
 import 'vue3-chessboard/style.css'
 
 let board: BoardApi
-let color: MoveableColor = 'black'
+const color = ref()
 
-const handleBoardCreated = (boardApi: BoardApi) => {
+const socket = new WebSocket('ws://localhost:5555/ping')
+socket.addEventListener('message', (event) => {
+  console.log('Message from server ', event.data)
+  const message = JSON.parse(event.data)
+  if (message.type === 'start') {
+    color.value = message.color
+    console.log(color.value)
+  } else if (message.type === 'move') {
+    const { from, to, promotion } = message
+    board.move({ from, to, promotion })
+  }
+})
+
+function handleBoardCreated(boardApi: BoardApi) {
   board = boardApi
-  console.log(board.getFen())
 }
 
 function handleMove(move: MoveEvent) {
+  if (!color.value.startsWith(move.color)) {
+    return
+  }
   console.log(move)
-  console.log(board.getFen())
+  const { from, to, promotion } = move
+  const message = JSON.stringify({ from, to, promotion, color: color.value, type: 'move' })
+  console.log(message)
+  socket.send(message)
 }
 </script>
 
 <template>
-  <TheChessboard @move="handleMove" @board-created="handleBoardCreated" :player-color="color" />
+  <TheChessboard
+    v-if="color"
+    @move="handleMove"
+    @board-created="handleBoardCreated"
+    :player-color="color"
+    :board-config="{ orientation: color }"
+  />
+  <h1 v-else>Waiting for player 2</h1>
 </template>
