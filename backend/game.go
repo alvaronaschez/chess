@@ -7,26 +7,23 @@ import (
 )
 
 type ChessGame struct {
-	whiteReadChannel chan Message
-	blackReadChannel chan Message
 	whiteWebsocket   *websocket.Conn
 	blackWebsocket   *websocket.Conn
+	whiteReadChannel chan Message
+	blackReadChannel chan Message
 }
 
 func NewChessGame(ws *websocket.Conn) *ChessGame {
 	game := ChessGame{
+		whiteWebsocket:   ws,
 		whiteReadChannel: make(chan Message),
 		blackReadChannel: make(chan Message),
-		whiteWebsocket:   ws,
 	}
 	return &game
 }
 
-func (game *ChessGame) AddWebsocket(ws *websocket.Conn) {
+func (game *ChessGame) Join(ws *websocket.Conn) {
 	game.blackWebsocket = ws
-}
-
-func (game ChessGame) Start() {
 	go forwardFromWebsocketToChannel(game.whiteWebsocket, game.whiteReadChannel)
 	go forwardFromWebsocketToChannel(game.blackWebsocket, game.blackReadChannel)
 	go func() {

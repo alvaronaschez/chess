@@ -25,8 +25,7 @@ func ping(w http.ResponseWriter, r *http.Request) {
 	if game == nil {
 		game = NewChessGame(ws)
 	} else {
-		game.AddWebsocket(ws)
-		game.Start()
+		game.Join(ws)
 		game = nil
 	}
 }
