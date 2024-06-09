@@ -6,7 +6,7 @@ import 'vue3-chessboard/style.css'
 let board: BoardApi
 const color = ref()
 
-const socket = new WebSocket('ws://localhost:5555/ping')
+const socket = new WebSocket('ws://localhost:5555/ws')
 socket.addEventListener('message', (event) => {
   const message = JSON.parse(event.data)
   if (message.type === 'start') {

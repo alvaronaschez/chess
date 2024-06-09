@@ -15,7 +15,7 @@ var upgrader = websocket.Upgrader{
 
 var game *ChessGame
 
-func ping(w http.ResponseWriter, r *http.Request) {
+func wsHandler(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -32,6 +32,6 @@ func ping(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	fmt.Println("Listening at port 5555")
-	http.HandleFunc("/ping", ping)
+	http.HandleFunc("/ws", wsHandler)
 	log.Fatal(http.ListenAndServe(":5555", nil))
 }

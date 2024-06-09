@@ -139,7 +139,7 @@ class ChessBoard extends HTMLElement {
       ],
     });
 
-    const socket = new WebSocket("ws://localhost:5555/ping");
+    const socket = new WebSocket("ws://localhost:5555/ws");
     socket.addEventListener("message", (event) => {
       console.log("Message from server ", event.data);
       let message = JSON.parse(event.data);
