@@ -8,7 +8,10 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  2048,
+	WriteBufferSize: 2048,
+}
 
 var game *ChessGame
 
@@ -18,31 +21,13 @@ func ping(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	defer ws.Close()
 
-	var ch chan Message
 	if game == nil {
 		game = NewChessGame(ws)
-		ch = game.WhiteChannel
 	} else {
 		game.AddWebsocket(ws)
-		ch = game.BlackChannel
 		game.Start()
 		game = nil
-	}
-
-	for {
-		message := Message{}
-		err = ws.ReadJSON(&message)
-
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		ch <- message
-
-		log.Printf("Message: %s", message)
 	}
 }
 
