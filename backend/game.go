@@ -48,6 +48,7 @@ func (game *ChessGame) Join(ws *websocket.Conn) {
 }
 
 func forwardFromWebsocketToChannel(ws *websocket.Conn, ch chan Message) {
+	defer ws.Close()
 	for {
 		message := Message{}
 		err := ws.ReadJSON(&message)
