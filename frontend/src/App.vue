@@ -8,11 +8,9 @@ const color = ref()
 
 const socket = new WebSocket('ws://localhost:5555/ping')
 socket.addEventListener('message', (event) => {
-  console.log('Message from server ', event.data)
   const message = JSON.parse(event.data)
   if (message.type === 'start') {
     color.value = message.color
-    console.log(color.value)
   } else if (message.type === 'move') {
     const { from, to, promotion } = message
     board.move({ from, to, promotion })
@@ -27,10 +25,8 @@ function handleMove(move: MoveEvent) {
   if (!color.value.startsWith(move.color)) {
     return
   }
-  console.log(move)
   const { from, to, promotion } = move
   const message = JSON.stringify({ from, to, promotion, color: color.value, type: 'move' })
-  console.log(message)
   socket.send(message)
 }
 </script>
