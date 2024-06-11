@@ -40,7 +40,10 @@ func (game *ChessGame) Join(ws *websocket.Conn) error {
 	return nil
 }
 
-func playChess(whiteWebsocket, blackWebsocket *websocket.Conn, whiteChannel, blackChannel <-chan Message) {
+func playChess(
+	whiteWebsocket, blackWebsocket *websocket.Conn,
+	whiteChannel, blackChannel <-chan Message,
+) {
 	turnWhite := true
 	whiteWebsocket.WriteJSON(Message{Type: "start", Color: "white"})
 	blackWebsocket.WriteJSON(Message{Type: "start", Color: "black"})
