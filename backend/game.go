@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"errors"
 
 	"github.com/gorilla/websocket"
 )
@@ -24,13 +24,20 @@ func NewChessGame(ws *websocket.Conn) *ChessGame {
 	return &game
 }
 
-func (game *ChessGame) Join(ws *websocket.Conn) {
+var ErrCannotJoinStartedGame = errors.New("cannot join a started game")
+
+func (game *ChessGame) Join(ws *websocket.Conn) error {
+	// you cannot join the same game twice
+	if game.blackWebsocket != nil {
+		return ErrCannotJoinStartedGame
+	}
 	game.blackWebsocket = ws
 	whiteChannel := make(chan Message)
 	blackChannel := make(chan Message)
 	go playChess(game.whiteWebsocket, game.blackWebsocket, whiteChannel, blackChannel)
 	go forwardFromWebsocketToChannel(game.whiteWebsocket, whiteChannel)
 	go forwardFromWebsocketToChannel(game.blackWebsocket, blackChannel)
+	return nil
 }
 
 func playChess(whiteWebsocket, blackWebsocket *websocket.Conn, whiteChannel, blackChannel <-chan Message) {
@@ -41,7 +48,6 @@ func playChess(whiteWebsocket, blackWebsocket *websocket.Conn, whiteChannel, bla
 		select {
 		case message := <-whiteChannel:
 			if message.Type == "error" {
-				log.Println("error")
 				return
 			}
 			if turnWhite {
