@@ -13,7 +13,9 @@ socket.addEventListener('message', (event) => {
     color.value = message.color
   } else if (message.type === 'move') {
     const { from, to, promotion } = message
-    board.move({ from, to, promotion })
+    if(color.value!=message.color){
+      board.move({ from, to, promotion })
+    }
   }
 })
 

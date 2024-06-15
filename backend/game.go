@@ -13,7 +13,7 @@ type ChessGame struct {
 
 type Message struct {
 	Type      string `json:"type" validate:"required,oneof=start move error"`
-	Color     string `json:"color" validate:"oneof=white black,required_if=Type start"`
+	Color     string `json:"color" validate:"oneof=white black,required_if=Type start|requited_if=Type move"`
 	From      string `json:"from" validate:"required_if=Type move"`
 	To        string `json:"to" validate:"required_if=Type move"`
 	Promotion string `json:"promotion" validate:"oneof=q r b k,required_if=Type move"`
@@ -50,20 +50,28 @@ func playChess(
 	for {
 		select {
 		case message := <-whiteChannel:
-			if message.Type == "error" {
+			switch message.Type {
+			case "error":
 				return
-			}
-			if turnWhite {
-				blackWebsocket.WriteJSON(message)
-				turnWhite = false
+			case "move":
+				if turnWhite {
+					message.Color = "white"
+					blackWebsocket.WriteJSON(message)
+					whiteWebsocket.WriteJSON(message)
+					turnWhite = false
+				}
 			}
 		case message := <-blackChannel:
-			if message.Type == "error" {
+			switch message.Type {
+			case "error":
 				return
-			}
-			if !turnWhite {
-				whiteWebsocket.WriteJSON(message)
-				turnWhite = true
+			case "move":
+				if !turnWhite {
+					message.Color = "black"
+					whiteWebsocket.WriteJSON(message)
+					blackWebsocket.WriteJSON(message)
+					turnWhite = true
+				}
 			}
 		}
 	}
