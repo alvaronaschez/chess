@@ -11,13 +11,25 @@ socket.addEventListener('message', (event) => {
   const message = JSON.parse(event.data)
   if (message.type === 'start') {
     color.value = message.color
+    console.log(`white clock ${formatSeconds(message.whiteTime)}`)
+    console.log(`black clock ${formatSeconds(message.blackTime)}`)
+    console.log("game started")
   } else if (message.type === 'move') {
+    console.log(`white clock ${formatSeconds(message.whiteTime)}`)
+    console.log(`black clock ${formatSeconds(message.blackTime)}`)
     const { from, to, promotion } = message
     if(color.value!=message.color){
       board.move({ from, to, promotion })
     }
   }
 })
+
+function formatSeconds(seconds: number){
+  const zeroPad = (num: number, places: number) => String(num).padStart(places, '0')
+  const minutes = Math.floor(seconds/60)
+  seconds = seconds%60
+  return `${zeroPad(minutes,2)}:${zeroPad(seconds,2)}`
+}
 
 function handleBoardCreated(boardApi: BoardApi) {
   board = boardApi

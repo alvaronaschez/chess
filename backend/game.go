@@ -17,6 +17,8 @@ type Message struct {
 	From      string `json:"from" validate:"required_if=Type move"`
 	To        string `json:"to" validate:"required_if=Type move"`
 	Promotion string `json:"promotion" validate:"oneof=q r b k,required_if=Type move"`
+	WhiteTime int    `json:"whiteTime" validate:"required_if=Type move|required_if=Type start"`
+	BlackTime int    `json:"blackTime" validate:"required_if=Type move|required_if=Type start"`
 }
 
 func NewChessGame(ws *websocket.Conn) *ChessGame {
@@ -45,8 +47,11 @@ func playChess(
 	whiteChannel, blackChannel <-chan Message,
 ) {
 	turnWhite := true
-	whiteWebsocket.WriteJSON(Message{Type: "start", Color: "white"})
-	blackWebsocket.WriteJSON(Message{Type: "start", Color: "black"})
+	whiteTimer := NewCountdown(7*60, 3, func() {})
+	blackTimer := NewCountdown(7*60, 3, func() {})
+	whiteWebsocket.WriteJSON(Message{Type: "start", Color: "white", WhiteTime: whiteTimer.GetRemaining(), BlackTime: blackTimer.GetRemaining()})
+	blackWebsocket.WriteJSON(Message{Type: "start", Color: "black", WhiteTime: whiteTimer.GetRemaining(), BlackTime: blackTimer.GetRemaining()})
+	whiteTimer.Start()
 	for {
 		select {
 		case message := <-whiteChannel:
@@ -55,7 +60,11 @@ func playChess(
 				return
 			case "move":
 				if turnWhite {
+					whiteTimer.Stop()
+					blackTimer.Start()
 					message.Color = "white"
+					message.WhiteTime = whiteTimer.GetRemaining()
+					message.BlackTime = blackTimer.GetRemaining()
 					blackWebsocket.WriteJSON(message)
 					whiteWebsocket.WriteJSON(message)
 					turnWhite = false
@@ -67,7 +76,11 @@ func playChess(
 				return
 			case "move":
 				if !turnWhite {
+					blackTimer.Stop()
+					whiteTimer.Start()
 					message.Color = "black"
+					message.WhiteTime = whiteTimer.GetRemaining()
+					message.BlackTime = blackTimer.GetRemaining()
 					whiteWebsocket.WriteJSON(message)
 					blackWebsocket.WriteJSON(message)
 					turnWhite = true
