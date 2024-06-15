@@ -5,19 +5,20 @@ import 'vue3-chessboard/style.css'
 
 let board: BoardApi
 const color = ref()
+const whiteTime = ref()
+const blackTime = ref()
 
 const socket = new WebSocket('ws://localhost:5555/ws')
 socket.addEventListener('message', (event) => {
   const message = JSON.parse(event.data)
   if (message.type === 'start') {
     color.value = message.color
-    console.log(`white clock ${formatSeconds(message.whiteTime)}`)
-    console.log(`black clock ${formatSeconds(message.blackTime)}`)
-    console.log("game started")
+    whiteTime.value = formatSeconds(message.whiteTime)
+    blackTime.value = formatSeconds(message.blackTime)
   } else if (message.type === 'move') {
-    console.log(`white clock ${formatSeconds(message.whiteTime)}`)
-    console.log(`black clock ${formatSeconds(message.blackTime)}`)
     const { from, to, promotion } = message
+    whiteTime.value = formatSeconds(message.whiteTime)
+    blackTime.value = formatSeconds(message.blackTime)
     if(color.value!=message.color){
       board.move({ from, to, promotion })
     }
@@ -46,12 +47,17 @@ function handleMove(move: MoveEvent) {
 </script>
 
 <template>
-  <TheChessboard
-    v-if="color"
-    @move="handleMove"
-    @board-created="handleBoardCreated"
-    :player-color="color"
-    :board-config="{ orientation: color }"
-  />
+  <div v-if="color">
+    <p v-if="color === 'black'">{{whiteTime}}</p>
+    <p v-else>{{blackTime}}</p>
+    <TheChessboard
+      @move="handleMove"
+      @board-created="handleBoardCreated"
+      :player-color="color"
+      :board-config="{ orientation: color }"
+    />
+    <p v-if="color === 'white'">{{whiteTime}}</p>
+    <p v-else>{{blackTime}}</p>
+  </div>
   <h1 v-else>Waiting for player 2</h1>
 </template>
