@@ -13,12 +13,12 @@ socket.addEventListener('message', (event) => {
   const message = JSON.parse(event.data)
   if (message.type === 'start') {
     color.value = message.color
-    whiteTime.value = formatSeconds(message.whiteTime)
-    blackTime.value = formatSeconds(message.blackTime)
+    whiteTime.value = message.whiteTime
+    blackTime.value = message.blackTime
   } else if (message.type === 'move') {
     const { from, to, promotion } = message
-    whiteTime.value = formatSeconds(message.whiteTime)
-    blackTime.value = formatSeconds(message.blackTime)
+    whiteTime.value = message.whiteTime
+    blackTime.value = message.blackTime
     if(color.value!=message.color){
       board.move({ from, to, promotion })
     }
@@ -44,20 +44,26 @@ function handleMove(move: MoveEvent) {
   const message = JSON.stringify({ from, to, promotion, color: color.value, type: 'move' })
   socket.send(message)
 }
+
+let interval = setInterval(() => {
+    if(whiteTime.value === 0 || blackTime.value===0) clearInterval(interval)
+    if(board.getTurnColor()==="white") whiteTime.value=whiteTime.value-1;
+    if(board.getTurnColor()=="black") blackTime.value--;
+    }, 1000)
 </script>
 
 <template>
   <div v-if="color">
-    <p v-if="color === 'black'">{{whiteTime}}</p>
-    <p v-else>{{blackTime}}</p>
+    <h1 v-if="color === 'black'">{{formatSeconds(whiteTime)}}</h1>
+    <h1 v-else>{{formatSeconds(blackTime)}}</h1>
     <TheChessboard
       @move="handleMove"
       @board-created="handleBoardCreated"
       :player-color="color"
       :board-config="{ orientation: color }"
     />
-    <p v-if="color === 'white'">{{whiteTime}}</p>
-    <p v-else>{{blackTime}}</p>
+    <h1 v-if="color === 'white'">{{formatSeconds(whiteTime)}}</h1>
+    <h1 v-else>{{formatSeconds(blackTime)}}</h1>
   </div>
   <h1 v-else>Waiting for player 2</h1>
 </template>
