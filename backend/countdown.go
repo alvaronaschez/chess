@@ -55,12 +55,13 @@ func (countdown *Countdown) Stop() {
 		return
 	}
 	now := time.Duration(time.Now().UnixNano()) * time.Nanosecond
-	countdown.remaining -= countdown.startedAt - now
+	elapsed := now - countdown.startedAt
+	countdown.remaining -= elapsed
 	countdown.remaining += countdown.increment
 	close(countdown.stopChannel)
 	countdown.status = Stopped
 }
 
-func GetRemaining(countdown Countdown) int {
+func (countdown Countdown) GetRemaining() int {
 	return int(countdown.remaining.Seconds())
 }
