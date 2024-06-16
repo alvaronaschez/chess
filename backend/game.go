@@ -42,13 +42,16 @@ func (game *ChessGame) Join(ws *websocket.Conn) error {
 	return nil
 }
 
+const gameDurationInMinutes = 7
+const incrementPerMoveInSeconds = 3
+
 func playChess(
 	whiteWebsocket, blackWebsocket *websocket.Conn,
 	whiteChannel, blackChannel <-chan Message,
 ) {
 	turnWhite := true
-	whiteTimer := NewCountdown(7*60, 3, func() {})
-	blackTimer := NewCountdown(7*60, 3, func() {})
+	whiteTimer := NewCountdown(gameDurationInMinutes*60, incrementPerMoveInSeconds, func() {})
+	blackTimer := NewCountdown(gameDurationInMinutes*60, incrementPerMoveInSeconds, func() {})
 	whiteWebsocket.WriteJSON(Message{Type: "start", Color: "white", WhiteTime: whiteTimer.GetRemaining(), BlackTime: blackTimer.GetRemaining()})
 	blackWebsocket.WriteJSON(Message{Type: "start", Color: "black", WhiteTime: whiteTimer.GetRemaining(), BlackTime: blackTimer.GetRemaining()})
 	whiteTimer.Start()
